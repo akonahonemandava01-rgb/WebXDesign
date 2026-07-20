@@ -20,8 +20,3 @@ logs/
 # Operating system files
 .DS_Store
 Thumbs.db
-
-**/node_modules/
-**/mysql_data/
-**/.env
-*.log
