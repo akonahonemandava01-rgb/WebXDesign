@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import StudentLayout from "../../layouts/StudentLayout";
 import "../../styles/StudentdashboardStyles/profile.css";
 
-const Profile = () => {
+const StudentProfile = () => {
   const [studentData, setStudentData] = useState(null);
 
   useEffect(() => {
@@ -58,4 +58,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default StudentProfile;
