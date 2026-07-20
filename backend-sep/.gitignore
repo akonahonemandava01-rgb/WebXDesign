@@ -1,0 +1,22 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Local environment variables (Crucial for security)
+.env
+.env.local
+.env.*.local
+
+# Docker database data directory (Prevents committing GBs of local DB storage)
+mysql_data/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
