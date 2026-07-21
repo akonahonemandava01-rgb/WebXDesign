@@ -17,7 +17,7 @@ const AdminLayout = ({ children, title = "Admin Dashboard" }) => {
   const adminMenu = [
     { label: "Dashboard", path: "/admin-dashboard", icon:DashboardIcon },
     { label: "Profile", path: "/admin-profile", icon: ProfileIcon },
-    { label: "Employers", path: "/admin/employers", icon: EmployersIcon },
+    { label: "Employers", path: "/employers", icon: EmployersIcon },
     { label: "Job Posts", path: "/admin/job-approval", icon:JobList },
     { label: "Student Placements", path: "/admin/placements", icon: StudentPlacemnet },
     { label: "Reports", path: "/admin/reports", icon: StatsIcon }

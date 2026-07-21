@@ -1,6 +1,7 @@
 import React from "react";
 import AdminLayout from "../../layouts/AdminLayout";
 import Card from "../../components/Card";
+import "../../styles/AdminDashboardStyles/AdminDashboard.css";
 
 const AdminDashboard = () => {
   return (

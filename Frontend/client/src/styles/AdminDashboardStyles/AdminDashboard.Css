@@ -1,0 +1,126 @@
+.page-content {
+  flex: 1;
+  padding: 2rem;
+  background-color: #f9f9f9;
+}
+
+/* ✅ Tabs */
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding-bottom: 0.5rem;
+  color: #555;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-bottom 0.2s ease;
+}
+
+.tab-button.active {
+  color: #48799c;
+  border-bottom: 2px solid #48799c;
+  font-weight: bold;
+}
+
+/* ✅ Table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.data-table th,
+.data-table td {
+  border: 1px solid #ddd;
+  padding: 0.8rem;
+  text-align: left;
+  font-size: 14px;
+}
+
+.data-table th {
+  background-color: #f2f2f2;
+  font-weight: 600;
+}
+
+.clickable-row:hover {
+  background-color: #eef6ff;
+  cursor: pointer;
+}
+
+/* ✅ Status Labels */
+.status-label {
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.status-label.active,
+.status-label.approved {
+  background-color: #06aa58;
+  color: #fff;
+}
+
+.status-label.pending {
+  background-color: #ffdd57;
+  color: #000;
+}
+
+.status-label.rejected {
+  background-color: #ff4d4d;
+  color: #fff;
+}
+
+/* ✅ Buttons */
+.btn-approve,
+.btn-reject,
+.btn-deactivate {
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-right: 0.4rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-approve {
+  background-color: #06aa58;
+  color: #fff;
+}
+
+.btn-approve:hover {
+  background-color: #05964d;
+}
+
+.btn-reject {
+  background-color: #ff4d4d;
+  color: #fff;
+}
+
+.btn-reject:hover {
+  background-color: #e63b3b;
+}
+
+.btn-deactivate {
+  background-color: #ccc;
+  color: #000;
+}
+
+.btn-deactivate:hover {
+  background-color: #999;
+}
+
+.no-action {
+  color: #999;
+  font-style: italic;
+}

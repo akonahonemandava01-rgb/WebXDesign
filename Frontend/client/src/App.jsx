@@ -10,6 +10,8 @@ import MyApplications from "./pages/Student/myApplication";
 import SavedJobs from "./pages/Student/SavedJobs";
 import AdminDashboard from "./pages/Admin/adminDashboard";
 import AdminProfile from "./pages/Admin/AdminProfile";
+import Employer from "./pages/Admin/Employer";
+import JobPosts from "./pages/Admin/jobpost";
 
 function App() {
   return (
@@ -26,8 +28,13 @@ function App() {
         <Route path="/view-jobs" element={<ViewJobs />} />
         <Route path="/applications" element={<MyApplications />} />
         <Route path="/savedJobs" element={<SavedJobs />} />
+
+
+
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/admin-profile" element={<AdminProfile />} />
+        <Route path="/employers" element={<Employer />} />
+        <Route path="/admin/job-approval" element={<JobPosts />} />
       </Routes>
     </Router>
   );
