@@ -24,7 +24,7 @@ const AdminProfile = () => {
   };
 
   return (
-    <AdminLayout title="Admin Profile">
+    <AdminLayout title="My Profile">
       <div className="profile-content">
       
 
@@ -92,7 +92,7 @@ const AdminProfile = () => {
           </div>
         </div>
 
-        {/* ✅ Education Section */}
+        {/* Education Section */}
         <div className="profile-section">
           <h4>Education</h4>
           <div className="education-list">

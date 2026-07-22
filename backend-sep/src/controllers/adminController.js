@@ -3,14 +3,18 @@ const pool = require("../config/db");
 async function listEmployers(req, res) {
     const { status } = req.query;
     try {
-        let query = `SELECT employer_id, company_name, registration_number, approval_status, created_at
-                      FROM EMPLOYERS`;
+        // Include approval metadata and approver email (if available)
+        let query = `SELECT e.employer_id, e.company_name, e.registration_number, e.approval_status,
+                            e.approved_by_user_id, e.approved_at, e.approval_comments, e.created_at,
+                            u.email AS approved_by_email
+                     FROM EMPLOYERS e
+                     LEFT JOIN USERS u ON e.approved_by_user_id = u.user_id`;
         const params = [];
         if (status) {
-            query += " WHERE approval_status = ?";
+            query += " WHERE e.approval_status = ?";
             params.push(status);
         }
-        query += " ORDER BY created_at DESC";
+        query += " ORDER BY e.created_at DESC";
 
         const [rows] = await pool.query(query, params);
         res.json(rows);
@@ -24,8 +28,8 @@ async function reviewEmployer(req, res) {
     const { id } = req.params;
     const { approval_status, approval_comments } = req.body;
 
-    if (!["Approved", "Rejected"].includes(approval_status)) {
-        return res.status(400).json({ error: "Status must be Approved or Rejected" });
+    if (!["Approved", "Rejected", "Deactivated"].includes(approval_status)) {
+        return res.status(400).json({ error: "Status must be Approved, Rejected, or Deactivated" });
     }
 
     try {
@@ -36,10 +40,26 @@ async function reviewEmployer(req, res) {
         if (existing.length === 0) {
             return res.status(404).json({ error: "Employer not found" });
         }
-        if (existing[0].approval_status !== "Pending") {
-            return res.status(409).json({
-                error: `This employer was already ${existing[0].approval_status.toLowerCase()} and cannot be reviewed again`
-            });
+
+        const currentStatus = existing[0].approval_status;
+        if (approval_status === "Approved") {
+            if (!["Pending", "Deactivated"].includes(currentStatus)) {
+                return res.status(409).json({
+                    error: `This employer is already ${currentStatus.toLowerCase()} and cannot be approved again`
+                });
+            }
+        } else if (approval_status === "Rejected") {
+            if (currentStatus !== "Pending") {
+                return res.status(409).json({
+                    error: `This employer is already ${currentStatus.toLowerCase()} and cannot be rejected`
+                });
+            }
+        } else if (approval_status === "Deactivated") {
+            if (currentStatus !== "Approved") {
+                return res.status(409).json({
+                    error: `Only approved employers can be deactivated`
+                });
+            }
         }
 
         await pool.query(
@@ -157,4 +177,63 @@ async function getStats(req, res) {
     }
 }
 
-module.exports = { listEmployers, reviewEmployer, listJobsForReview, reviewJob, getStats };
+// ---- Student placements for admin
+async function listPlacements(req, res) {
+    try {
+        const query = `SELECT ap.application_id, s.student_no, s.full_name,
+                              f.name AS faculty, s.level, c.name AS course,
+                              e.company_name AS company, j.title AS position,
+                              ap.applied_at, ap.application_status
+                       FROM APPLICATIONS ap
+                       JOIN STUDENTS s ON ap.student_id = s.student_id
+                       LEFT JOIN COURSE c ON s.course_id = c.course_id
+                       LEFT JOIN DEPARTMENT d ON c.department_id = d.department_id
+                       LEFT JOIN FACULTY f ON d.faculty_id = f.faculty_id
+                       LEFT JOIN JOBS j ON ap.job_id = j.job_id
+                       LEFT JOIN EMPLOYERS e ON j.employer_id = e.employer_id
+                       ORDER BY ap.applied_at DESC`;
+        const [rows] = await pool.query(query);
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to fetch placements" });
+    }
+}
+
+async function getEmployerDetails(req, res) {
+    const { id } = req.params;
+    try {
+        const [rows] = await pool.query(
+            `SELECT e.*, u.email AS owner_email
+             FROM EMPLOYERS e
+             LEFT JOIN USERS u ON e.user_id = u.user_id
+             WHERE e.employer_id = ?`,
+            [id]
+        );
+        if (rows.length === 0) return res.status(404).json({ error: 'Employer not found' });
+        res.json(rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch employer details' });
+    }
+}
+
+async function getJobDetails(req, res) {
+    const { id } = req.params;
+    try {
+        const [rows] = await pool.query(
+            `SELECT j.*, e.company_name, e.registration_number
+             FROM JOBS j
+             LEFT JOIN EMPLOYERS e ON j.employer_id = e.employer_id
+             WHERE j.job_id = ? AND j.is_deleted = FALSE`,
+            [id]
+        );
+        if (rows.length === 0) return res.status(404).json({ error: 'Job not found' });
+        res.json(rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch job details' });
+    }
+}
+
+module.exports = { listEmployers, reviewEmployer, listJobsForReview, reviewJob, getStats, listPlacements };

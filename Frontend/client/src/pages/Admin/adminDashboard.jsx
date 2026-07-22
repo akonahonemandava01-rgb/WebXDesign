@@ -1,81 +1,119 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import AdminLayout from "../../layouts/AdminLayout";
 import Card from "../../components/Card";
+import "../../styles/AdminDashboardStyles/AdminDashboard.css";
+import { getJobsForReview, getStats, reviewJob } from "../../utils/api";
 
 const AdminDashboard = () => {
+  const [stats, setStats] = useState(null);
+  const [pendingJobs, setPendingJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [statusMessage, setStatusMessage] = useState("");
+
+  useEffect(() => {
+    async function loadDashboardData() {
+      try {
+        const [statsData, jobs] = await Promise.all([
+          getStats(),
+          getJobsForReview("Pending"),
+        ]);
+        setStats(statsData);
+        setPendingJobs(jobs);
+      } catch (err) {
+        setStatusMessage(err.message || "Failed to load admin dashboard data.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDashboardData();
+  }, []);
+
+  const handleReview = async (jobId, approvalStatus) => {
+    try {
+      await reviewJob(jobId, approvalStatus, "");
+      setPendingJobs((prev) => prev.filter((job) => job.job_id !== jobId));
+      setStatusMessage(`Job ${approvalStatus.toLowerCase()} successfully.`);
+    } catch (err) {
+      setStatusMessage(err.message || "Failed to update job review status.");
+    }
+  };
+
+  const pendingJobsCount = pendingJobs.length;
+  const pendingApplicationsCount = stats?.applications_by_status?.find((item) => item.application_status === "Pending")?.count || 0;
+  const approvedJobsCount = stats?.jobs_by_status?.find((item) => item.approval_status === "Approved")?.count || 0;
+
   return (
-    <AdminLayout title="Admin Dashboard">
-      <h3>Admin Dashboard</h3>
+    <AdminLayout title="Admin">
+      
       <p>Manage employers, job posts, student placements, and system reports.</p>
 
-      {/* ✅ Dashboard Cards */}
+      {statusMessage && <p className="status-message">{statusMessage}</p>}
+
       <div className="dashboard-row">
-        <Card title="New Employers" count="8" description="Pending approval requests" />
-        <Card title="New Job Posts" count="12" description="Jobs awaiting review" />
-        <Card title="Student Placements" count="48" description="Active student hires" />
-        <Card title="Reports & Stats" count="4" description="Analytics available" />
+        <Card
+          title="Total Students"
+          count={stats?.total_students ?? "-"}
+          description="Registered students"
+        />
+        <Card
+          title="Total Employers"
+          count={stats?.total_employers ?? "-"}
+          description="Registered employers"
+        />
+        <Card
+          title="Pending Job Reviews"
+          count={loading ? "..." : pendingJobsCount}
+          description="Jobs awaiting approval"
+        />
+        <Card
+          title="Pending Applications"
+          count={loading ? "..." : pendingApplicationsCount}
+          description="Applications needing attention"
+        />
       </div>
 
-      {/* ✅ Employer Overview */}
-      <section>
-        <h3>Employer Overview</h3>
-        <div className="dashboard-row">
-          <Card title="Active Employers" count="24" description="Approved companies" />
-          <Card title="Total Employers" count="132" description="Registered companies" />
-        </div>
-      </section>
-
-      {/* ✅ Pending Job Posts */}
       <section>
         <h3>Pending Job Posts</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Job Title</th>
-              <th>Company</th>
-              <th>Date Submitted</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Java Developer</td>
-              <td>Tech Innovate</td>
-              <td>23 July 2026</td>
-              <td>
-                <button>Approve</button>
-                <button>Reject</button>
-              </td>
-            </tr>
-            <tr>
-              <td>Marketing Coordinator</td>
-              <td>BizGrowth Solutions</td>
-              <td>20 July 2026</td>
-              <td>
-                <button>Approve</button>
-                <button>Reject</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        {loading ? (
+          <p>Loading pending jobs...</p>
+        ) : pendingJobsCount === 0 ? (
+          <p>No pending jobs found.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Job Title</th>
+                <th>Location</th>
+                <th>Type</th>
+                <th>Date Submitted</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pendingJobs.map((job) => (
+                <tr key={job.job_id}>
+                  <td>{job.title}</td>
+                  <td>{job.location}</td>
+                  <td>{job.employment_type}</td>
+                  <td>{new Date(job.created_at).toLocaleDateString()}</td>
+                  <td>
+                    <button onClick={() => handleReview(job.job_id, "Approved")}>Approve</button>
+                    <button onClick={() => handleReview(job.job_id, "Rejected")}>Reject</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </section>
 
-      {/* ✅ Student Placement Stats */}
       <section>
-        <h3>Student Placement Stats</h3>
+        <h3>Job Approval Summary</h3>
         <div className="dashboard-row">
-          <Card title="Current Placements" count="48" description="Students currently placed" />
-          <Card title="Graduated Placements" count="115" description="Graduates placed" />
-          <Card title="Placement Rate" count="78%" description="Overall success rate" />
-        </div>
-      </section>
-
-      {/* ✅ Reports */}
-      <section>
-        <h3>System Reports</h3>
-        <div className="dashboard-row">
-          <Card title="Monthly Job Approvals" count="46" description="Jobs approved this month" />
-          <Card title="Student Hires This Month" count="19" description="New hires recorded" />
+          <Card title="Approved Jobs" count={approvedJobsCount} description="Jobs already approved" />
+          <Card title="Pending Reviews" count={pendingJobsCount} description="Waiting approval" />
+          <Card title="Total Jobs" count={stats?.jobs_by_status?.reduce((sum, item) => sum + item.count, 0) ?? "-"} description="All job posts" />
         </div>
       </section>
     </AdminLayout>

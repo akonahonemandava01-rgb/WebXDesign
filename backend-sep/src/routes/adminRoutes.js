@@ -5,7 +5,10 @@ const {
     reviewEmployer,
     listJobsForReview,
     reviewJob,
-    getStats
+    getStats,
+    listPlacements,
+    getEmployerDetails,
+    getJobDetails
 } = require("../controllers/adminController");
 const { authenticate, authorize } = require("../middleware/auth");
 
@@ -16,5 +19,8 @@ router.get("/jobs", authenticate, authorize("admin"), listJobsForReview);
 router.put("/jobs/:id", authenticate, authorize("admin"), reviewJob);
 
 router.get("/stats", authenticate, authorize("admin"), getStats);
+router.get("/placements", authenticate, authorize("admin"), listPlacements);
+router.get("/employers/:id", authenticate, authorize("admin"), getEmployerDetails);
+router.get("/jobs/:id", authenticate, authorize("admin"), getJobDetails);
 
 module.exports = router;
