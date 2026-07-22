@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import DashboardIcon from "../assets/StudentIcons/dashboard.png";
@@ -7,20 +8,30 @@ import MyApplicationIcon from "../assets/StudentIcons/Myapplication.png";
 import searchJobIcon from "../assets/StudentIcons/searchJob.png";
 import visualIcon from "../assets/StudentIcons/visual.png";
 import cvIcon from "../assets/StudentIcons/cv.png";
+import Toast from "../components/Toast";
+import { clearToken } from "../utils/api";
 
 const StudentLayout = ({ children, title = "Student Dashboard" }) => {
+  const [toastMessage, setToastMessage] = useState("");
+  const navigate = useNavigate();
+
   const handleSignOut = () => {
-    alert("Signed out");
+    clearToken();
+    setToastMessage("Signed out successfully.");
+    setTimeout(() => {
+      navigate("/login");
+      window.location.reload();
+    }, 500);
   };
 
   const studentMenu = [
-    { label: "Dashboard", path: "/dashboard", icon: DashboardIcon },
-    { label: "Profile", path: "/profile", icon: ProfileIcon },
-    { label: "Create CV", path: "/create-cv", icon: cvIcon },
-    { label: "View Jobs", path: "/view-jobs", icon: visualIcon },
-    { label: "My Applications", path: "/applications", icon: MyApplicationIcon },
-    { label: "Saved Jobs", path: "/savedJobs" },
-    { label: "Courses", path: "/courses" }
+    { label: "Dashboard", path: "/student/dashboard", icon: DashboardIcon },
+    { label: "Profile", path: "/student/profile", icon: ProfileIcon },
+    { label: "Create CV", path: "/student/createCv", icon: cvIcon },
+    { label: "View Jobs", path: "/student/viewjobs", icon: visualIcon },
+    { label: "My Applications", path: "/student/applications", icon: MyApplicationIcon },
+    { label: "Saved Jobs", path: "/student/savedJobs" },
+    { label: "Courses", path: "/student/courses" }
   ];
 
   return (
@@ -35,6 +46,7 @@ const StudentLayout = ({ children, title = "Student Dashboard" }) => {
           {children}
         </main>
       </div>
+      {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage("")} />}
     </div>
   );
 };

@@ -1,30 +1,35 @@
 import React, { useState, useEffect } from "react";
 import StudentLayout from "../../layouts/StudentLayout";
 import "../../styles/StudentdashboardStyles/CreateCv.css";
+import { getStudentProfile } from "../../utils/api";
 
 const CreateCV = () => {
   const [studentData, setStudentData] = useState(null);
   const [educationList, setEducationList] = useState([]);
   const [summary, setSummary] = useState("");
   const [experienceList, setExperienceList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    // ✅ Mocked data (replace later with backend fetch)
-    const fetchedData = {
-      name: "Rilinde Nkosi",
-      email: "rilinde@example.com",
-      phone: "+27 123 456 789",
-      location: "Johannesburg, South Africa",
-      education: [
-        { school: "University of Cape Town", degree: "BSc Computer Science", years: "2022 - 2025" }
-      ]
-    };
-    setStudentData(fetchedData);
-    setEducationList(fetchedData.education);
+    async function loadProfile() {
+      try {
+        const profile = await getStudentProfile();
+        setStudentData(profile);
+        setEducationList(profile.education || []);
+        setExperienceList(profile.employment || []);
+        setSummary(profile.career_objective || "");
+      } catch (err) {
+        setError(err.message || "Failed to load CV data.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadProfile();
   }, []);
 
   const handleAddEducation = () => {
-    setEducationList([...educationList, { school: "", degree: "", years: "" }]);
+    setEducationList([...educationList, { institution: "", qualification: "", date_range: "", subjects: "", majors: "", sub_majors: "", research: "" }]);
   };
 
   const handleEducationChange = (index, field, value) => {
@@ -34,7 +39,7 @@ const CreateCV = () => {
   };
 
   const handleAddExperience = () => {
-    setExperienceList([...experienceList, { title: "", company: "", years: "", description: "" }]);
+    setExperienceList([...experienceList, { employer_name: "", job_title: "", date_range: "", tasks_responsibilities: "" }]);
   };
 
   const handleExperienceChange = (index, field, value) => {
@@ -53,15 +58,28 @@ const CreateCV = () => {
         <h3>Build Your Resume</h3>
         <p>Utilize your existing profile information to craft your CV.</p>
 
-        {studentData && (
+        {loading ? (
+          <p>Loading your profile...</p>
+        ) : error ? (
+          <p className="error">{error}</p>
+        ) : studentData ? (
           <>
             <section className="cv-section">
               <h4>Personal Information</h4>
               <div className="cv-info">
-                <p><strong>Name:</strong> {studentData.name}</p>
+                <p><strong>Name:</strong> {studentData.full_name || studentData.email}</p>
                 <p><strong>Email:</strong> {studentData.email}</p>
-                <p><strong>Phone:</strong> {studentData.phone}</p>
-                <p><strong>Location:</strong> {studentData.location}</p>
+                <p><strong>Student Number:</strong> {studentData.student_no || "Not set"}</p>
+                <p><strong>Phone:</strong> {studentData.cel || studentData.tel || "Not set"}</p>
+                <p><strong>Location:</strong> {studentData.address || "Not set"}</p>
+                <p><strong>Gender:</strong> {studentData.gender || "Not set"}</p>
+                <p><strong>Nationality:</strong> {studentData.nationality || "Not set"}</p>
+                <p><strong>Level:</strong> {studentData.level || "Not set"}</p>
+                <p><strong>ID / Passport:</strong> {studentData.id_passport_no || "Not set"}</p>
+                <p><strong>Driver's License:</strong> {studentData.drivers_license || "Not set"}</p>
+                <p><strong>Race:</strong> {studentData.race || "Not set"}</p>
+                <p><strong>Achievements:</strong> {studentData.achievements || "Not set"}</p>
+                <p><strong>Interests:</strong> {studentData.interests || "Not set"}</p>
               </div>
             </section>
 
@@ -80,21 +98,44 @@ const CreateCV = () => {
                 <div key={index} className="education-item">
                   <input
                     type="text"
-                    placeholder="School / University"
-                    value={edu.school}
-                    onChange={(e) => handleEducationChange(index, "school", e.target.value)}
+                    placeholder="University / Institution"
+                    value={edu.institution || ""}
+                    onChange={(e) => handleEducationChange(index, "institution", e.target.value)}
                   />
                   <input
                     type="text"
-                    placeholder="Degree"
-                    value={edu.degree}
-                    onChange={(e) => handleEducationChange(index, "degree", e.target.value)}
+                    placeholder="Qualification"
+                    value={edu.qualification || ""}
+                    onChange={(e) => handleEducationChange(index, "qualification", e.target.value)}
                   />
                   <input
                     type="text"
-                    placeholder="Years Attended"
-                    value={edu.years}
-                    onChange={(e) => handleEducationChange(index, "years", e.target.value)}
+                    placeholder="Date Range"
+                    value={edu.date_range || ""}
+                    onChange={(e) => handleEducationChange(index, "date_range", e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Subjects"
+                    value={edu.subjects || ""}
+                    onChange={(e) => handleEducationChange(index, "subjects", e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Majors"
+                    value={edu.majors || ""}
+                    onChange={(e) => handleEducationChange(index, "majors", e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Sub Majors"
+                    value={edu.sub_majors || ""}
+                    onChange={(e) => handleEducationChange(index, "sub_majors", e.target.value)}
+                  />
+                  <textarea
+                    placeholder="Research / Notes"
+                    value={edu.research || ""}
+                    onChange={(e) => handleEducationChange(index, "research", e.target.value)}
                   />
                 </div>
               ))}
@@ -107,26 +148,26 @@ const CreateCV = () => {
                 <div key={index} className="experience-item">
                   <input
                     type="text"
+                    placeholder="Employer"
+                    value={exp.employer_name || ""}
+                    onChange={(e) => handleExperienceChange(index, "employer_name", e.target.value)}
+                  />
+                  <input
+                    type="text"
                     placeholder="Job Title"
-                    value={exp.title}
-                    onChange={(e) => handleExperienceChange(index, "title", e.target.value)}
+                    value={exp.job_title || ""}
+                    onChange={(e) => handleExperienceChange(index, "job_title", e.target.value)}
                   />
                   <input
                     type="text"
-                    placeholder="Company"
-                    value={exp.company}
-                    onChange={(e) => handleExperienceChange(index, "company", e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Years Worked"
-                    value={exp.years}
-                    onChange={(e) => handleExperienceChange(index, "years", e.target.value)}
+                    placeholder="Date Range"
+                    value={exp.date_range || ""}
+                    onChange={(e) => handleExperienceChange(index, "date_range", e.target.value)}
                   />
                   <textarea
                     placeholder="Describe your responsibilities and achievements..."
-                    value={exp.description}
-                    onChange={(e) => handleExperienceChange(index, "description", e.target.value)}
+                    value={exp.tasks_responsibilities || ""}
+                    onChange={(e) => handleExperienceChange(index, "tasks_responsibilities", e.target.value)}
                   />
                 </div>
               ))}
@@ -137,6 +178,8 @@ const CreateCV = () => {
               <button className="btn-save" onClick={handleSaveCV}>Save CV</button>
             </div>
           </>
+        ) : (
+          <p>No CV data available.</p>
         )}
       </div>
     </StudentLayout>

@@ -1,21 +1,43 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import StudentLayout from "../../layouts/StudentLayout";
 import SearchBar from "../../components/SearchBar";
-import JobPost from "./JobPost";   // ✅ reuse existing component
+import JobPost from "./JobPost";
+import { getJobs } from "../../utils/api";
 import "../../styles/StudentdashboardStyles/ViewJobs.css";
 
 const ViewJobs = () => {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    async function loadJobs() {
+      try {
+        const data = await getJobs();
+        setJobs(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadJobs();
+  }, []);
+
   const handleSearch = (query) => {
-    alert(`Searching for: ${query}`);
+    setSearchQuery(query);
   };
 
+  const visibleJobs = jobs.filter((job) =>
+    job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    job.location.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <StudentLayout title="View Jobs">
-      {/* ✅ Search bar */}
+    <StudentLayout title="Jobs">
       <SearchBar placeholder="Search jobs..." onSearch={handleSearch} />
 
       <div className="jobs-layout">
-        {/* ✅ Filters */}
         <aside className="filters-panel">
           <h4>Filters</h4>
           <div>
@@ -48,10 +70,8 @@ const ViewJobs = () => {
           <button className="btn-apply">Apply Filters</button>
         </aside>
 
-        {/* ✅ Job Listings */}
         <section className="job-listings">
-         {/*} <h4>Job Listings</h4>*/}
-          <JobPost />   {/* ✅ reuse your existing JobPost component */}
+          {loading ? <p>Loading jobs...</p> : <JobPost jobs={visibleJobs} />}
         </section>
       </div>
     </StudentLayout>

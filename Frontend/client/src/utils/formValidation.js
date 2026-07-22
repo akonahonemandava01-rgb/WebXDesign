@@ -15,8 +15,8 @@ export const formFields = (value, fieldName) =>{
 export const validateEmail = (email) =>{
     if(!email) 
         return "Email is Required";
-const regex = /\S+@\S+\.\S+/;
-    if(regex.test(email)) 
+    const regex = /\S+@\S+\.\S+/;
+    if(!regex.test(email)) 
         return "Invalid Email format";
 
     return null;

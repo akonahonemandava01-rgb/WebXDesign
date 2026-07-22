@@ -72,8 +72,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #ffffff;
-  color: #000000;
+  background: #53b1dd;
+  color: #ffffff;
   padding: 1rem 2rem;
   border-bottom: 1px solid #e6ebef;
   position: sticky;
@@ -84,13 +84,14 @@
 .header-left h2 {
   margin: 0;
   font-size: 28px;
-  color: #3e6784;
+  color: #000000;
 }
 
 .user-name {
   margin-left: 1rem;
-  font-size: 18px;
-  color: #0779dd;
+  font-size: 19px;
+  font-weight: bold;
+  color: #ffffff;
 }
 
 .header-right {
@@ -102,18 +103,26 @@
 /* Sign Out styling */
 .signout {
   cursor: pointer;
-  color: #0c0c0c;
-  font-size: 16px;
-  font-weight: bold;
-  padding: 8px 16px;
-  background: url('../assets/Signout.png') no-repeat left center;
-  gap:20px;
-  background-size: 18px;
-  transition: color 0.3s ease;
+  padding: 0;
+  color: black;
+  background: transparent;
+  border: none;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.signout:hover {
-  color: #e60000;
+.signout-icon {
+  width: 22px;
+  height: 22px;
+  color: #000000;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.signout:hover .signout-icon {
+  opacity: 0.8;
 }
 
 /* ===========================
